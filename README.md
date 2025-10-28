@@ -52,4 +52,4 @@ Maven installed. mvn -v
 
 Chrome browser installed (matching chromedriver or use WebDriverManager).
 
-(Optional but recommended) Use WebDriverManager to avoid manual chromedriver management.
+
