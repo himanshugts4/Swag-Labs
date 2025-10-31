@@ -1,11 +1,8 @@
 package Login;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Duration;
 
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
 import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -90,41 +87,49 @@ public class Invetorypage {
             addToCartButton2.click();
             System.out.println("✅ Added Product 2 to cart");
 
-            // Step 6: Verify cart badge shows 2 items
-            WebElement cartBadge = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.className("shopping_cart_badge")
-            ));
-
-            String cartCount = cartBadge.getText();
-            System.out.println("🛒 Items in Cart: " + cartCount);
-
-            // Fixed assertion - should be 2 since we added 2 products
-            Assert.assertEquals(cartCount, "2", "✅ Cart count should be 2 after adding two products.");
+            // Step 6: Verify cart badge (optional check)
+            try {
+                WebElement cartBadge = driver.findElement(By.xpath("//span[@class='shopping_cart_badge']"));
+                String cartCount = cartBadge.getText();
+                System.out.println("🛒 Items in Cart Badge: " + cartCount);
+            } catch (Exception e) {
+                System.out.println("⚠️ Cart badge not visible (this is okay, will verify on cart page)");
+            }
 
             // Step 7: Navigate to cart page
             driver.findElement(By.className("shopping_cart_link")).click();
             wait.until(ExpectedConditions.urlContains("cart"));
             System.out.println("✅ Navigated to cart page successfully.");
 
-            // Step 8: Take screenshot
-            takeScreenshot("cart_page_screenshot");
+            // Step 8: Verify items in cart page
+            java.util.List<WebElement> cartItems = driver.findElements(By.className("cart_item"));
+            int itemCount = cartItems.size();
+            System.out.println("🛒 Total items in cart: " + itemCount);
+            Assert.assertEquals(itemCount, 2, "✅ Cart should have 2 items.");
+
+            // Step 9: Take full page screenshot
+            TakesScreenshot ts = (TakesScreenshot) driver;
+            File sourcefile = ts.getScreenshotAs(OutputType.FILE);
+            File targetfile = new File(System.getProperty("user.dir") + "\\screenshots\\fullpage.png");
+            sourcefile.renameTo(targetfile); // copy sourcefile to target file
+            System.out.println("📸 Screenshot saved at: " + targetfile.getAbsolutePath());
 
         } catch (Exception e) {
             System.err.println("❌ Test failed: " + e.getMessage());
-            takeScreenshot("error_screenshot");
+            e.printStackTrace();
+            
+            // Take error screenshot
+            try {
+                TakesScreenshot ts = (TakesScreenshot) driver;
+                File sourcefile = ts.getScreenshotAs(OutputType.FILE);
+                File targetfile = new File(System.getProperty("user.dir") + "\\screenshots\\error.png");
+                sourcefile.renameTo(targetfile);
+                System.out.println("📸 Error screenshot saved at: " + targetfile.getAbsolutePath());
+            } catch (Exception screenshotException) {
+                System.err.println("❌ Failed to capture error screenshot");
+            }
+            
             throw e;
-        }
-    }
-
-    // ---------- Helper Method for Screenshots ----------
-    private void takeScreenshot(String fileName) {
-        try {
-            File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            File destination = new File(fileName + ".png");
-            Files.copy(screenshot.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("📸 Screenshot saved at: " + destination.getAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("❌ Failed to save screenshot: " + e.getMessage());
         }
     }
 }
