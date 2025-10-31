@@ -6,7 +6,7 @@
       <class name="Login.Invetorypage">
         <methods>
           <include name="verifyProductAddToCart" invocation-numbers="0"/>
-          <include name="tearDown"/>
+          <include name="teardown"/>
           <include name="setup"/>
         </methods>
       </class> <!-- Login.Invetorypage -->
